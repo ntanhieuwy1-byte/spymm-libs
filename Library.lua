@@ -1617,12 +1617,20 @@ function Library:AddDraggableButton(Text: string, Func, ExcludeScaling: boolean?
     local Table = {}
 
     local Button = New("TextButton", {
-        BackgroundColor3 = "BackgroundColor",
+        BackgroundColor3 = "MainColor",
         Position = UDim2.fromOffset(6, 6),
-        TextSize = 16,
+        TextSize = 14,
         ZIndex = 10,
+        AutoButtonColor = false,
         Parent = ScreenGui,
     })
+
+    New("UIStroke", {
+        Color = "OutlineColor",
+        Thickness = 1.5,
+        Parent = Button,
+    })
+
     table.insert(
         Library.Corners, 
         New("UICorner", {
@@ -1638,7 +1646,13 @@ function Library:AddDraggableButton(Text: string, Func, ExcludeScaling: boolean?
             })
         )
     end
-    Library:AddOutline(Button)
+
+    Button.MouseEnter:Connect(function()
+        TweenService:Create(Button, Library.TweenInfo, { BackgroundColor3 = Library:GetBetterColor(Library.Scheme.MainColor, 10) }):Play()
+    end)
+    Button.MouseLeave:Connect(function()
+        TweenService:Create(Button, Library.TweenInfo, { BackgroundColor3 = Library.Scheme.MainColor }):Play()
+    end)
 
     Button.MouseButton1Click:Connect(function()
         Library:SafeCallback(Func, Table)
@@ -1648,10 +1662,10 @@ function Library:AddDraggableButton(Text: string, Func, ExcludeScaling: boolean?
     Table.Button = Button
 
     function Table:SetText(Text: string)
-        local X, Y = Library:GetTextBounds(Text, Library.Scheme.Font, 16)
+        local X, Y = Library:GetTextBounds(Text, Library.Scheme.Font, 14)
 
         Button.Text = Text
-        Button.Size = UDim2.fromOffset(X * 2, Y * 2)
+        Button.Size = UDim2.fromOffset(X + 24, Y + 12)
     end
     Table:SetText(Text)
 
@@ -8605,13 +8619,13 @@ function Library:CreateWindow(WindowInfo)
     end
 
     if Library.IsMobile then
-        local ToggleButton = Library:AddDraggableButton("Toggle", function()
+        local ToggleButton = Library:AddDraggableButton("Menu", function()
             Library:Toggle()
         end, true)
 
-        local LockButton = Library:AddDraggableButton("Lock", function(self)
+        local LockButton = Library:AddDraggableButton("Khóa", function(self)
             Library.CantDragForced = not Library.CantDragForced
-            self:SetText(Library.CantDragForced and "Unlock" or "Lock")
+            self:SetText(Library.CantDragForced and "Mở khóa" or "Khóa")
         end, true)
 
         if WindowInfo.MobileButtonsSide == "Right" then
