@@ -206,7 +206,7 @@ local SaveManager = {} do
     --// Save, Load, Delete, Refresh \\--
     function SaveManager:Save(name)
         if (not name) then
-            return false, "no config file is selected"
+            return false, "chưa chọn tệp cấu hình"
         end
         SaveManager:CheckFolderTree()
 
@@ -237,7 +237,7 @@ local SaveManager = {} do
 
         local success, encoded = pcall(HttpService.JSONEncode, HttpService, data)
         if not success then
-            return false, "failed to encode data"
+            return false, "không thể mã hóa dữ liệu"
         end
 
         writefile(fullPath, encoded)
@@ -255,10 +255,10 @@ local SaveManager = {} do
             file = self.Folder .. "/settings/" .. self.SubFolder .. "/" .. name .. ".json"
         end
 
-        if not isfile(file) then return false, "invalid file" end
+        if not isfile(file) then return false, "tệp không hợp lệ" end
 
         local success, decoded = pcall(HttpService.JSONDecode, HttpService, readfile(file))
-        if not success then return false, "decode error" end
+        if not success then return false, "lỗi giải mã" end
 
         if self.UseLoadingOrder == true and typeof(self.LoadingOrder) == "table" then
             table.sort(decoded.objects, function(a, b)
@@ -292,7 +292,7 @@ local SaveManager = {} do
         if not isfile(file) then return false, "invalid file" end
 
         local success = pcall(delfile, file)
-        if not success then return false, "delete file error" end
+        if not success then return false, "lỗi xóa tệp" end
 
         return true
     end
@@ -336,9 +336,9 @@ local SaveManager = {} do
 
         if (not success) then
             if self.Library then
-                self.Library:Notify("Failed to load config list: " .. tostring(data))
+                self.Library:Notify("Tải danh sách cấu hình thất bại: " .. tostring(data))
             else
-                warn("Failed to load config list: " .. tostring(data))
+                warn("Tải danh sách cấu hình thất bại: " .. tostring(data))
             end
 
             return {}
@@ -362,11 +362,10 @@ local SaveManager = {} do
                 return "none"
             end
 
-            name = tostring(name)
-            return if name == "" then "none" else name
+            return if name == "" then "không có" else name
         end
 
-        return "none"
+        return "không có"
     end
 
     function SaveManager:LoadAutoloadConfig()
@@ -380,17 +379,17 @@ local SaveManager = {} do
         if isfile(autoLoadPath) then
             local successRead, name = pcall(readfile, autoLoadPath)
             if not successRead then
-                self.Library:Notify("Failed to load autoload config: write file error")
+                self.Library:Notify("Tải cấu hình tự động tải thất bại: lỗi ghi tệp")
                 return
             end
 
             local success, err = self:Load(name)
             if not success then
-                self.Library:Notify("Failed to load autoload config: " .. err)
+                self.Library:Notify("Tải cấu hình tự động tải thất bại: " .. err)
                 return
             end
 
-            self.Library:Notify(string.format("Auto loaded config %q", name))
+            self.Library:Notify(string.format("Đã tự động tải cấu hình %q", name))
         end
     end
 
@@ -402,8 +401,7 @@ local SaveManager = {} do
             autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
         end
 
-        local success = pcall(writefile, autoLoadPath, name)
-        if not success then return false, "write file error" end
+        if not success then return false, "lỗi ghi tệp" end
 
         return true, ""
     end
@@ -416,8 +414,7 @@ local SaveManager = {} do
             autoLoadPath = self.Folder .. "/settings/" .. self.SubFolder .. "/autoload.txt"
         end
 
-        local success = pcall(delfile, autoLoadPath)
-        if not success then return false, "delete file error" end
+        if not success then return false, "lỗi xóa tệp" end
 
         return true, ""
     end
@@ -426,97 +423,97 @@ local SaveManager = {} do
     function SaveManager:BuildConfigSection(tab)
         assert(self.Library, "Must set SaveManager.Library")
 
-        local section = tab:AddRightGroupbox("Configuration", "folder-cog")
+        local section = tab:AddRightGroupbox("Cấu hình", "folder-cog")
 
-        section:AddInput("SaveManager_ConfigName",    { Text = "Config name" })
-        section:AddButton("Create config", function()
+        section:AddInput("SaveManager_ConfigName",    { Text = "Tên cấu hình" })
+        section:AddButton("Tạo cấu hình", function()
             local name = self.Library.Options.SaveManager_ConfigName.Value
 
             if name:gsub(" ", "") == "" then
-                self.Library:Notify("Invalid config name (empty)", 2)
+                self.Library:Notify("Tên cấu hình không hợp lệ (trống)", 2)
                 return
             end
 
             local success, err = self:Save(name)
             if not success then
-                self.Library:Notify("Failed to create config: " .. err)
+                self.Library:Notify("Tạo cấu hình thất bại: " .. err)
                 return
             end
 
-            self.Library:Notify(string.format("Created config %q", name))
+            self.Library:Notify(string.format("Đã tạo cấu hình %q", name))
             self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
             self.Library.Options.SaveManager_ConfigList:SetValue(nil)
         end)
 
         section:AddDivider()
 
-        section:AddDropdown("SaveManager_ConfigList", { Text = "Config list", Values = self:RefreshConfigList(), AllowNull = true })
-        section:AddButton("Load config", function()
+        section:AddDropdown("SaveManager_ConfigList", { Text = "Danh sách cấu hình", Values = self:RefreshConfigList(), AllowNull = true })
+        section:AddButton("Tải cấu hình", function()
             local name = self.Library.Options.SaveManager_ConfigList.Value
 
             local success, err = self:Load(name)
             if not success then
-                self.Library:Notify("Failed to load config: " .. err)
+                self.Library:Notify("Tải cấu hình thất bại: " .. err)
                 return
             end
 
-            self.Library:Notify(string.format("Loaded config %q", name))
+            self.Library:Notify(string.format("Đã tải cấu hình %q", name))
         end)
-        section:AddButton("Overwrite config", function()
+        section:AddButton("Ghi đè cấu hình", function()
             local name = self.Library.Options.SaveManager_ConfigList.Value
 
             local success, err = self:Save(name)
             if not success then
-                self.Library:Notify("Failed to overwrite config: " .. err)
+                self.Library:Notify("Ghi đè cấu hình thất bại: " .. err)
                 return
             end
 
-            self.Library:Notify(string.format("Overwrote config %q", name))
+            self.Library:Notify(string.format("Đã ghi đè cấu hình %q", name))
         end)
 
-        section:AddButton("Delete config", function()
+        section:AddButton("Xóa cấu hình", function()
             local name = self.Library.Options.SaveManager_ConfigList.Value
 
             local success, err = self:Delete(name)
             if not success then
-                self.Library:Notify("Failed to delete config: " .. err)
+                self.Library:Notify("Xóa cấu hình thất bại: " .. err)
                 return
             end
 
-            self.Library:Notify(string.format("Deleted config %q", name))
+            self.Library:Notify(string.format("Đã xóa cấu hình %q", name))
             self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
             self.Library.Options.SaveManager_ConfigList:SetValue(nil)
         end)
 
-        section:AddButton("Refresh list", function()
+        section:AddButton("Làm mới danh sách", function()
             self.Library.Options.SaveManager_ConfigList:SetValues(self:RefreshConfigList())
             self.Library.Options.SaveManager_ConfigList:SetValue(nil)
         end)
 
-        section:AddButton("Set as autoload", function()
+        section:AddButton("Đặt làm tự động tải", function()
             local name = self.Library.Options.SaveManager_ConfigList.Value
 
             local success, err = self:SaveAutoloadConfig(name)
             if not success then
-                self.Library:Notify("Failed to set autoload config: " .. err)
+                self.Library:Notify("Đặt cấu hình tự động tải thất bại: " .. err)
                 return
             end
 
-            self.Library:Notify(string.format("Set %q to auto load", name))
-            self.AutoloadConfigLabel:SetText("Current autoload config: " .. name)
+            self.Library:Notify(string.format("Đã đặt %q thành tự động tải", name))
+            self.AutoloadConfigLabel:SetText("Cấu hình tự động tải hiện tại: " .. name)
         end)
-        section:AddButton("Reset autoload", function()
+        section:AddButton("Đặt lại tự động tải", function()
             local success, err = self:DeleteAutoLoadConfig()
             if not success then
-                self.Library:Notify("Failed to set autoload config: " .. err)
+                self.Library:Notify("Đặt cấu hình tự động tải thất bại: " .. err)
                 return
             end
 
-            self.Library:Notify("Set autoload to none")
-            self.AutoloadConfigLabel:SetText("Current autoload config: none")
+            self.Library:Notify("Đã bỏ đặt tự động tải")
+            self.AutoloadConfigLabel:SetText("Cấu hình tự động tải hiện tại: không có")
         end)
 
-        self.AutoloadConfigLabel = section:AddLabel("Current autoload config: " .. self:GetAutoloadConfig(), true)
+        self.AutoloadConfigLabel = section:AddLabel("Cấu hình tự động tải hiện tại: " .. self:GetAutoloadConfig(), true)
 
         -- self:LoadAutoloadConfig()
         self:SetIgnoreIndexes({ "SaveManager_ConfigList", "SaveManager_ConfigName" })
