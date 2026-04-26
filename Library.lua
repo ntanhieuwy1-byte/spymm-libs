@@ -303,8 +303,8 @@ local Templates = {
 
     --// Library \\--
     Window = {
-        Title = "No Title",
-        Footer = "No Footer",
+        Title = "Không có tiêu đề",
+        Footer = "Không có chân trang",
         Position = UDim2.fromOffset(6, 6),
         Size = UDim2.fromOffset(720, 600),
         IconSize = UDim2.fromOffset(30, 30),
@@ -339,8 +339,8 @@ local Templates = {
         CompactWidthActivation = 128,
     },
     Dialog = {
-        Title = "Dialog",
-        Description = "Description",
+        Title = "Hộp thoại",
+        Description = "Mô tả",
         AutoDismiss = true,
         OutsideClickDismiss = true,
         FooterButtons = {}
@@ -367,7 +367,7 @@ local Templates = {
         SidebarWidth = 250,
     },
     Toggle = {
-        Text = "Toggle",
+        Text = "Bật/Tắt",
         Default = false,
 
         Callback = function() end,
@@ -378,7 +378,7 @@ local Templates = {
         Visible = true,
     },
     Input = {
-        Text = "Input",
+        Text = "Nhập dữ liệu",
         Default = "",
         Finished = false,
         Numeric = false,
@@ -396,7 +396,7 @@ local Templates = {
         Visible = true,
     },
     Slider = {
-        Text = "Slider",
+        Text = "Thanh trượt",
         Default = 0,
         Min = 0,
         Max = 100,
@@ -459,7 +459,7 @@ local Templates = {
 
     --// Addons \\-
     KeyPicker = {
-        Text = "KeyPicker",
+        Text = "Phím tắt",
 
         Default = "None",
         DefaultModifiers = {},
@@ -2089,6 +2089,13 @@ local ResizeIcon = Library:GetIcon("move-diagonal-2")
 local KeyIcon = Library:GetIcon("key")
 local MoveIcon = Library:GetIcon("move")
 
+local ModeTranslations = {
+    ["Always"] = "Luôn bật",
+    ["Toggle"] = "Bật/Tắt",
+    ["Hold"] = "Giữ",
+    ["Press"] = "Nhấn"
+}
+
 function Library:SetIconModule(module: IconModule)
     FetchIcons = true
     Icons = module
@@ -2403,7 +2410,7 @@ do
                 BackgroundColor3 = "MainColor",
                 BackgroundTransparency = 1,
                 Size = UDim2.new(1, 0, 0, 21),
-                Text = Mode,
+                Text = ModeTranslations[Mode] or Mode,
                 TextSize = 14,
                 TextTransparency = 0.5,
                 Parent = MenuTable.Menu,
@@ -2481,7 +2488,7 @@ do
                     KeybindsToggle:SetNormal(true)
                 end
 
-                KeybindsToggle:SetText(("[%s] %s (%s)"):format(KeyPicker.DisplayValue, KeyPicker.Text, KeyPicker.Mode))
+                KeybindsToggle:SetText(("[%s] %s (%s)"):format(KeyPicker.DisplayValue, KeyPicker.Text, ModeTranslations[KeyPicker.Mode] or KeyPicker.Mode))
                 KeybindsToggle:SetVisibility(true)
                 KeybindsToggle:Display(State)
             end
@@ -2492,7 +2499,7 @@ do
                 return true
             elseif KeyPicker.Mode == "Hold" then
                 local Key = KeyPicker.Value
-                if Key == "None" then
+                if Key == "Không" then
                     return false
                 end
 
@@ -2553,11 +2560,11 @@ do
             end)
 
             if Key == nil then
-                KeyPicker.Value = "None"
+                KeyPicker.Value = "Không"
             elseif IsKeyValid then
                 KeyPicker.Value = Key
             else
-                KeyPicker.Value = "Unknown"
+                KeyPicker.Value = "Không xác định"
             end
 
             KeyPicker.Modifiers =
@@ -2708,14 +2715,14 @@ do
                 break -- Input found, end loop
             until false
 
-            local Key = "Unknown"
+            local Key = "Không xác định"
             if SpecialKeysInput[Input.UserInputType] ~= nil then
                 Key = SpecialKeysInput[Input.UserInputType]
             elseif Input.UserInputType == Enum.UserInputType.Keyboard then
-                Key = Input.KeyCode == Enum.KeyCode.Escape and "None" or Input.KeyCode.Name
+                Key = Input.KeyCode == Enum.KeyCode.Escape and "Không" or Input.KeyCode.Name
             end
 
-            ActiveModifiers = if Input.KeyCode == Enum.KeyCode.Escape or Key == "Unknown" then {} else ActiveModifiers
+            ActiveModifiers = if Input.KeyCode == Enum.KeyCode.Escape or Key == "Không xác định" then {} else ActiveModifiers
 
             KeyPicker.Toggled = false
             KeyPicker:SetValue({ Key, KeyPicker.Mode, ActiveModifiers })
@@ -2735,8 +2742,8 @@ do
 
             if
                 KeyPicker.Mode == "Always"
-                or KeyPicker.Value == "Unknown"
-                or KeyPicker.Value == "None"
+                or KeyPicker.Value == "Không xác định"
+                or KeyPicker.Value == "Không"
                 or Picking
                 or UserInputService:GetFocusedTextBox()
             then
@@ -2778,8 +2785,8 @@ do
             end
 
             if
-                KeyPicker.Value == "Unknown"
-                or KeyPicker.Value == "None"
+                KeyPicker.Value == "Không xác định"
+                or KeyPicker.Value == "Không"
                 or Picking
                 or UserInputService:GetFocusedTextBox()
             then
@@ -6566,7 +6573,7 @@ function Library:CreateWindow(WindowInfo)
 
         SearchBox = New("TextBox", {
             BackgroundColor3 = "MainColor",
-            PlaceholderText = "Search",
+            PlaceholderText = "Tìm kiếm...",
             Size = WindowInfo.SearchbarSize,
             TextScaled = true,
             Visible = not (WindowInfo.DisableSearch or false),
@@ -8980,7 +8987,7 @@ function Library:CreateLoading(LoadingInfo)
         BackgroundTransparency = 1,
         Position = UDim2.fromOffset(15, 15),
         Size = UDim2.new(1, -30, 0, 18),
-        Text = "Error",
+        Text = "Lỗi",
         TextColor3 = "RedColor",
         TextSize = 18,
         TextXAlignment = Enum.TextXAlignment.Left,
@@ -8991,7 +8998,7 @@ function Library:CreateLoading(LoadingInfo)
         BackgroundTransparency = 1,
         Position = UDim2.fromOffset(15, 39),
         Size = UDim2.new(1, -30, 1, -90),
-        Text = "Error Message",
+        Text = "Thông báo lỗi",
         TextSize = 14,
         TextTransparency = 0.2,
         TextWrapped = true,
