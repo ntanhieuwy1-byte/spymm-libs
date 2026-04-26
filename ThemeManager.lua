@@ -296,7 +296,7 @@ do
 
     function ThemeManager:SaveCustomTheme(file)
         if file:gsub(" ", "") == "" then
-            self.Library:Notify("Tên tệp không hợp lệ (rỗng)", 3)
+            self.Library:Notify("Invalid file name for theme (empty)", 3)
             return
         end
 
@@ -357,16 +357,16 @@ do
     --// GUI \\--
     function ThemeManager:CreateThemeManager(groupbox)
         groupbox
-            :AddLabel("Màu nền")
+            :AddLabel("Background color")
             :AddColorPicker("BackgroundColor", { Default = self.Library.Scheme.BackgroundColor })
-        groupbox:AddLabel("Màu chính"):AddColorPicker("MainColor", { Default = self.Library.Scheme.MainColor })
-        groupbox:AddLabel("Màu nhấn"):AddColorPicker("AccentColor", { Default = self.Library.Scheme.AccentColor })
+        groupbox:AddLabel("Main color"):AddColorPicker("MainColor", { Default = self.Library.Scheme.MainColor })
+        groupbox:AddLabel("Accent color"):AddColorPicker("AccentColor", { Default = self.Library.Scheme.AccentColor })
         groupbox
-            :AddLabel("Màu viền")
+            :AddLabel("Outline color")
             :AddColorPicker("OutlineColor", { Default = self.Library.Scheme.OutlineColor })
-        groupbox:AddLabel("Màu chữ"):AddColorPicker("FontColor", { Default = self.Library.Scheme.FontColor })
+        groupbox:AddLabel("Font color"):AddColorPicker("FontColor", { Default = self.Library.Scheme.FontColor })
         groupbox:AddDropdown("FontFace", {
-            Text = "Kiểu chữ",
+            Text = "Font Face",
             Default = "Code",
             Values = { "BuilderSans", "Code", "Fantasy", "Gotham", "Jura", "Roboto", "RobotoMono", "SourceSans" },
         })
@@ -382,11 +382,11 @@ do
 
         groupbox:AddDivider()
 
-        groupbox:AddDropdown("ThemeManager_ThemeList", { Text = "Danh sách giao diện", Values = ThemesArray, Default = 1 })
-        groupbox:AddButton("Đặt làm mặc định", function()
+        groupbox:AddDropdown("ThemeManager_ThemeList", { Text = "Theme list", Values = ThemesArray, Default = 1 })
+        groupbox:AddButton("Set as default", function()
             self:SaveDefault(self.Library.Options.ThemeManager_ThemeList.Value)
             self.Library:Notify(
-                string.format("Đã đặt giao diện mặc định: %q", self.Library.Options.ThemeManager_ThemeList.Value)
+                string.format("Set default theme to %q", self.Library.Options.ThemeManager_ThemeList.Value)
             )
         end)
 
@@ -396,18 +396,18 @@ do
 
         groupbox:AddDivider()
 
-        groupbox:AddInput("ThemeManager_CustomThemeName", { Text = "Tên giao diện tùy chỉnh" })
-        groupbox:AddButton("Tạo giao diện", function()
+        groupbox:AddInput("ThemeManager_CustomThemeName", { Text = "Custom theme name" })
+        groupbox:AddButton("Create theme", function()
             local name = self.Library.Options.ThemeManager_CustomThemeName.Value
 
             if name:gsub(" ", "") == "" then
-                self.Library:Notify("Tên giao diện không hợp lệ (rỗng)", 2)
+                self.Library:Notify("Invalid theme name (empty)", 2)
                 return
             end
 
             self:SaveCustomTheme(name)
 
-            self.Library:Notify(string.format("Đã tạo giao diện %q", name))
+            self.Library:Notify(string.format("Created theme %q", name))
             self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
             self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
         end)
@@ -416,56 +416,56 @@ do
 
         groupbox:AddDropdown(
             "ThemeManager_CustomThemeList",
-            { Text = "Giao diện tùy chỉnh", Values = self:ReloadCustomThemes(), AllowNull = true, Default = 1 }
+            { Text = "Custom themes", Values = self:ReloadCustomThemes(), AllowNull = true, Default = 1 }
         )
-        groupbox:AddButton("Tải giao diện", function()
+        groupbox:AddButton("Load theme", function()
             local name = self.Library.Options.ThemeManager_CustomThemeList.Value
 
             self:ApplyTheme(name)
-            self.Library:Notify(string.format("Đã tải giao diện %q", name))
+            self.Library:Notify(string.format("Loaded theme %q", name))
         end)
-        groupbox:AddButton("Ghi đè giao diện", function()
+        groupbox:AddButton("Overwrite theme", function()
             local name = self.Library.Options.ThemeManager_CustomThemeList.Value
 
             self:SaveCustomTheme(name)
-            self.Library:Notify(string.format("Đã ghi đè giao diện %q", name))
+            self.Library:Notify(string.format("Overwrote config %q", name))
         end)
-        groupbox:AddButton("Xóa giao diện", function()
+        groupbox:AddButton("Delete theme", function()
             local name = self.Library.Options.ThemeManager_CustomThemeList.Value
 
             local success, err = self:Delete(name)
             if not success then
-                self.Library:Notify("Không thể xóa giao diện: " .. err)
+                self.Library:Notify("Failed to delete theme: " .. err)
                 return
             end
 
-            self.Library:Notify(string.format("Đã xóa giao diện %q", name))
+            self.Library:Notify(string.format("Deleted theme %q", name))
             self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
             self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
         end)
-        groupbox:AddButton("Làm mới danh sách", function()
+        groupbox:AddButton("Refresh list", function()
             self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
             self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
         end)
-        groupbox:AddButton("Đặt làm mặc định", function()
+        groupbox:AddButton("Set as default", function()
             if
                 self.Library.Options.ThemeManager_CustomThemeList.Value ~= nil
                 and self.Library.Options.ThemeManager_CustomThemeList.Value ~= ""
             then
                 self:SaveDefault(self.Library.Options.ThemeManager_CustomThemeList.Value)
                 self.Library:Notify(
-                    string.format("Đã đặt giao diện mặc định: %q", self.Library.Options.ThemeManager_CustomThemeList.Value)
+                    string.format("Set default theme to %q", self.Library.Options.ThemeManager_CustomThemeList.Value)
                 )
             end
         end)
-        groupbox:AddButton("Đặt lại mặc định", function()
+        groupbox:AddButton("Reset default", function()
             local success = pcall(delfile, self.Folder .. "/themes/default.txt")
             if not success then
-                self.Library:Notify("Không thể đặt lại mặc định: lỗi xóa tệp")
+                self.Library:Notify("Failed to reset default: delete file error")
                 return
             end
 
-            self.Library:Notify("Đã xóa giao diện mặc định")
+            self.Library:Notify("Set default theme to nothing")
             self.Library.Options.ThemeManager_CustomThemeList:SetValues(self:ReloadCustomThemes())
             self.Library.Options.ThemeManager_CustomThemeList:SetValue(nil)
         end)
@@ -490,7 +490,7 @@ do
 
     function ThemeManager:CreateGroupBox(tab)
         assert(self.Library, "Must set ThemeManager.Library first!")
-        return tab:AddLeftGroupbox("Giao diện", "paintbrush")
+        return tab:AddLeftGroupbox("Themes", "paintbrush")
     end
 
     function ThemeManager:ApplyToTab(tab)
